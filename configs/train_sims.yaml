@@ -1,0 +1,67 @@
+base:
+  seed: 1111
+  lr: 0.0001
+  weight_decay: 0.0001
+  batch_size: 64
+  n_epochs: 200
+  num_workers: 8
+  alpha: 1.0 #重建损失权重
+  rec_loss: 'SmoothL1Loss' #重建损失权重 L1Loss SmoothL1Loss MSELoss
+  train_mode: regression # only support regression now
+  missing_rate_eval_test: 0.5   # used for evaluation and testing
+  do_validation: true
+
+dataset:
+  datasetName: sims
+  dataPath: /data/SIMS/Processed/unaligned_39.pkl
+
+
+model:
+
+  com_dim: &com_dim 128
+  dropout: &dropout 0.2
+
+  feature_extractor:
+    bert_pretrained: 'bert-base-chinese'
+
+  tmm: #text-aware modality mixup
+    input_length: [39, 55, 400] # language, video, audio
+    input_dim: [768, 709, 33] # language, video, audio
+    hidden_dim: *com_dim # language, video, audio
+  tmr: #text-based modality reconstructor
+    input_dim_low: 768
+    hidden_dim_low: 768
+    input_dim_high: *com_dim
+    hidden_dim_high: *com_dim
+    dropout: *dropout
+
+  tc_mamba:
+    num_layers: 1
+    d_model: *com_dim #
+    d_ffn: 1024
+    activation: 'GELU'
+    dropout: *dropout
+    causal: false
+    mamba_config:
+      d_state: 16
+      expand: 2
+      d_conv: 4
+      bidirectional: true
+  tq_mamba:
+    num_layers: 2
+    d_model: *com_dim #
+    d_ffn: 1024
+    activation: 'GELU'
+    dropout: *dropout
+    causal: false
+    mamba_config:
+      d_state: 16
+      expand: 2
+      d_conv: 4
+      bidirectional: true
+    attn_heads: 8
+
+
+  regression: #task learning
+    input_dim: *com_dim
+    out_dim: 1
