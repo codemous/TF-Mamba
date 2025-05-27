@@ -95,7 +95,7 @@ def main():
             for cur_r in missing_rate_list:
                 test_results_list = []
                 for _, cur_seed in enumerate([seed]):
-                    best_ckpt = os.path.join(f'ckpt/{dataset_name}-save/best_{key_eval}_{cur_seed}.pth')
+                    best_ckpt = os.path.join(f'ckpt/{dataset_name}/best_{key_eval}_{cur_seed}.pth')
                     model.load_state_dict(torch.load(best_ckpt)['state_dict'])
                     args['base']['missing_rate_eval_test'] = cur_r  # Set missing rate
 
